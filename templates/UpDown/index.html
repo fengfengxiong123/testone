@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- 新 Bootstrap4 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- bootstrap.bundle.min.js 用于弹窗、提示、下拉菜单，包含了 popper.min.js -->
+    <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+
+    <!-- 最新的 Bootstrap4 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div>示例：</div>
+<div>示例客户端号：客户端1</div>
+<div>分数：110000</div>
+<div class="my-3" id="client_num"><span>客户端号</span><input></div>
+<div class="mb-3" id="score"><span>对应分数</span><input></div>
+<input class="mb-3" id="submit_data" type="button" value="上传信息">
+
+<div class="mb-3" id="check_client_num"><span>客户端号</span><input type="text"></div>
+<div class="mb-3"><span>排名范围</span><input type="text" id="pre_num">-<input type="text" id="next_num"></div>
+<div class="mb-3" id="check_submit_data"><input type="button" value="查看排名"></div>
+
+<table class="table col-3">
+
+    <thead>
+    <tr>
+        <th scope="col">排名</th>
+        <th scope="col">客户端</th>
+        <th scope="col">分数</th>
+    </tr>
+    </thead>
+    <tbody id="datas_ten_or_eleven">
+
+    </tbody>
+</table>
+<script>
+
+    //查看排行榜接口
+    $('#check_submit_data>input').click(function () {
+        var client_num = $('#check_client_num>input').val();
+        var pre_num = $('#pre_num').val();
+        var next_num = $('#next_num').val();
+        if (client_num && (pre_num || next_num)) {
+            alert('输入客户端号或排名范围中的一个')
+        } else if (!pre_num && !next_num && !client_num) {
+            alert('请输入搜索条件')
+        } else {
+            $.ajax(
+                {
+                    type: 'POST',
+                    url: 'checkRank/',
+                    context: '',
+                    data: {
+                        'check_client_num': client_num,
+                        'pre_num': pre_num,
+                        'next_num': next_num,
+                    },
+                    success: function (res) {
+                        console.log(res)
+                        var ranks = res.ranks;
+                        var obj_one = res.obj_one;
+                        var obj_one_num = res.obj_one_num;
+                        var html_content = '';
+                        var tbody_in_html = $('#datas_ten_or_eleven');
+                        for (var i = 0; i < ranks.length; i++) {
+                            html_content += '<tr><th scope="row">' + ranks[i]['num'] + '</th><td>' + ranks[i].name['client_num'] + '</td><td>' + ranks[i].name['score'] + '</td></tr>'
+                        }
+                        if (obj_one) {
+                            html_content += '<tr><th scope="row">' + obj_one_num + '</th><td>' + obj_one.client_num + '</td><td>' + obj_one.score + '</td></tr>'
+                            tbody_in_html.html(html_content)
+                        } else {
+                            tbody_in_html.html(html_content)
+                        }
+                    },
+                    error: function () {
+                    },
+                }
+            )
+        }
+    });
+
+    // 提交分数，客户端名接口
+    $('#submit_data').click(function () {
+        console.log('点击事件已经触发');
+        var client_num = $('#client_num>input').val();
+        var score = $('#score>input').val();
+        $.ajax(
+            {
+                type: 'POST',
+                url: 'upScoreClientnum/',
+                context: '',
+                data: {
+                    'score': score,
+                    'client_num': client_num,
+                },
+                success: function (res) {
+                    console.log(res)
+
+                },
+                error: function () {
+                },
+            }
+        )
+    })
+
+
+</script>
+</body>
+
+</html>
